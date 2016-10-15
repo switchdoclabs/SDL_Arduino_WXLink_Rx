@@ -5,7 +5,6 @@
 #define SOFTWAREVERSION 001
 
 #include <SoftwareSerial.h>
-#include <RH_Serial.h>
 
 #include <Wire.h>
 
@@ -76,19 +75,52 @@ long convert4BytesToLong(byte *buffer, int bufferStart)
 
 }
 
-float convert4BytesToFloat(byte *buffer, int bufferStart)
+
+float convert4BytesToAM2315Float(byte *buffer, int bufferStart)
 {
+
+
   union u_tag {
     byte b[4];
     float fval;
   } u;
 
-  u.b[0] = buffer[bufferStart];
-  u.b[1] = buffer[bufferStart + 1];
-  u.b[2] = buffer[bufferStart + 2];
-  u.b[3] = buffer[bufferStart + 3];
+
+  u.b[0] = buffer[bufferStart + 3];
+  u.b[1] = buffer[bufferStart + 2];
+  u.b[2] = buffer[bufferStart + 1];
+  u.b[3] = buffer[bufferStart + 0];  
+  Serial.print("fval=");
+  Serial.println(u.fval);
 
   return u.fval;
+
+
+}
+
+float convert4BytesToFloat(byte *buffer, int bufferStart)
+{
+
+
+  union u_tag {
+    byte b[4];
+    float fval;
+  } u;
+
+
+  u.b[0] = buffer[bufferStart + 0];
+  u.b[1] = buffer[bufferStart + 1];
+  u.b[2] = buffer[bufferStart + 2];
+  u.b[3] = buffer[bufferStart + 3]; 
+  
+
+  return u.fval;
+
+ 
+
+
+
+
 
 
 }
@@ -155,8 +187,16 @@ int interpretBuffer(byte *buffer, int buflen)
   Serial.print("Max Wind Gust=");
   Serial.println(convert4BytesToFloat(buffer, 21));
 
+
+  
   Serial.print("Outside Temperature=");
   Serial.println(convert4BytesToFloat(buffer, 25));
+
+  Serial.print("OT Hex=");
+  Serial.print(buffer[25], HEX);
+  Serial.print(buffer[26], HEX);
+  Serial.print(buffer[27], HEX);
+  Serial.println(buffer[28], HEX);
 
   Serial.print("Outside Humidity=");
   Serial.println(convert4BytesToFloat(buffer, 29));
